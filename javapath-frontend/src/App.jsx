@@ -26,12 +26,14 @@ const App = () => {
   const [aiFeedback, setAiFeedback] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
   // Function to Run Code via JDoodle
   const handleRunCode = async () => {
     setIsLoading(true);
     setOutput("");
     try {
-      const response = await axios.post('http://localhost:5000/api/execute', { code });
+      const response = await axios.post(`${API_BASE_URL}/api/execute`, { code });
       setOutput(response.data.output || "No output returned.");
     } catch (err) {
       setOutput("Error connecting to compiler.");
@@ -44,7 +46,7 @@ const App = () => {
     setShowGemini(true);
     setAiFeedback("Analyzing your code with Gemini AI...");
     try {
-      const response = await axios.post('http://localhost:5000/api/review', { 
+      const response = await axios.post(`${API_BASE_URL}/api/review`, { 
         code, 
         taskDescription: "Refactor Payment Gateway with Encapsulation" 
       });
