@@ -4,12 +4,11 @@ import { AuthContext } from './AuthContext';
 import { 
   Play, CheckCircle, Code, MessageSquare, 
   Sparkles, Terminal, BookOpen, ChevronRight, 
-  Trophy, ShieldCheck, Briefcase, User, LogOut, Send
+  Trophy, ShieldCheck, Briefcase, User, LogOut, Send, AlertTriangle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 
-// Expanded realistic challenges
 const CHALLENGES = [
   { id: 1, title: "The Main Method", topic: "Syntax", desc: "Your first entry point into the corporate world.", initialCode: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello Corporate World");\n    }\n}` },
   { id: 2, title: "Variables & Encapsulation", topic: "Basics", desc: "Create a private balance variable and provide a secure Getter and Setter.", initialCode: `public class BankAccount {\n    // Add your private variable and getters/setters here\n    \n    public static void main(String[] args) {\n        BankAccount acc = new BankAccount();\n        System.out.println("Secure System Booted");\n    }\n}` },
@@ -30,12 +29,57 @@ const Dashboard = () => {
   const [showChat, setShowChat] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
+  const [assistanceLevel, setAssistanceLevel] = useState("max"); // basic or max
   const chatEndRef = useRef(null);
+
+  // Real-time diagnostics
+  const [diagnostics, setDiagnostics] = useState([]);
 
   const activeChallenge = CHALLENGES.find(c => c.id === activeChallengeId);
 
+  // Real-time syntax checker logic
   useEffect(() => {
-    // When challenge changes, update code
+    const checkJavaSyntax = (codeText) => {
+      const errors = [];
+      if (!codeText) return errors;
+
+      // 1. Mismatched braces
+      const openBraces = (codeText.match(/\{/g) || []).length;
+      const closeBraces = (codeText.match(/\}/g) || []).length;
+      if (openBraces !== closeBraces) {
+        errors.push(`Curly Braces: Open: ${openBraces}, Closed: ${closeBraces}`);
+      }
+
+      // 2. Mismatched parens
+      const openParens = (codeText.match(/\(/g) || []).length;
+      const closeParens = (codeText.match(/\)/g) || []).length;
+      if (openParens !== closeParens) {
+        errors.push(`Parentheses: Open: ${openParens}, Closed: ${closeParens}`);
+      }
+
+      // 3. Semicolon detection (basic)
+      const lines = codeText.split('\n');
+      lines.forEach((line, index) => {
+        const trimmed = line.trim();
+        if (trimmed.length === 0) return;
+        
+        // Exclude structure statements
+        if (trimmed.startsWith('//') || trimmed.startsWith('/*') || trimmed.startsWith('*') || trimmed.startsWith('@')) return;
+        if (trimmed.endsWith('{') || trimmed.endsWith('}') || trimmed.endsWith(';') || trimmed.endsWith(',')) return;
+        if (trimmed.includes('class ') || trimmed.includes('interface ') || trimmed.includes('public static void main') || trimmed.includes('public void ') || trimmed.includes('private void ') || trimmed.includes('protected void ')) return;
+        if (trimmed.startsWith('if') || trimmed.startsWith('for') || trimmed.startsWith('while') || trimmed.startsWith('switch') || trimmed.startsWith('else')) return;
+
+        errors.push(`Line ${index + 1}: Missing semicolon ';' at end of instruction.`);
+      });
+
+      return errors;
+    };
+
+    const errors = checkJavaSyntax(code);
+    setDiagnostics(errors);
+  }, [code]);
+
+  useEffect(() => {
     const c = CHALLENGES.find(ch => ch.id === activeChallengeId);
     if (c) setCode(c.initialCode);
   }, [activeChallengeId]);
@@ -78,7 +122,8 @@ const Dashboard = () => {
       const response = await axios.post(`${API_BASE_URL}/api/chat`, { 
         message: userMessage,
         code, 
-        taskDescription: activeChallenge.desc 
+        taskDescription: activeChallenge.desc,
+        assistanceLevel
       });
       setChatHistory(response.data.history);
     } catch (err) {
@@ -90,8 +135,7 @@ const Dashboard = () => {
   const openGeminiReview = () => {
     setShowChat(true);
     if (chatHistory.length === 0) {
-      setChatMessage("Review my code and tell me what I should improve for a corporate setting.");
-      // Just populate input, user can press enter
+      setChatMessage("Review my current code and suggest the better and best ways to structure it.");
     }
   };
 
@@ -139,7 +183,6 @@ const Dashboard = () => {
               {CHALLENGES.map((day) => {
                 const isCompleted = progress.includes(day.id);
                 const isCurrent = activeChallengeId === day.id;
-                // If previous is completed, or it's the first one, it's unlocked
                 const isUnlocked = day.id === 1 || progress.includes(day.id - 1);
                 
                 return (
@@ -204,7 +247,7 @@ const Dashboard = () => {
           </section>
 
           {/* CODE EDITOR PANEL */}
-          <section className="flex-1 flex flex-col bg-[#FDFDFD]">
+          <section className="flex-1 flex flex-col bg-[#FDFDFD] relative">
             <div className="h-12 bg-white border-b border-slate-200 flex items-center justify-between px-4">
               <div className="flex gap-2">
                 <div className="w-3 h-3 rounded-full bg-red-400" />
@@ -221,6 +264,19 @@ const Dashboard = () => {
                 {isLoading ? "Running..." : "Deploy & Run"}
               </button>
             </div>
+
+            {/* REAL-TIME DIAGNOSTICS FLOATING ALERT */}
+            {diagnostics.length > 0 && (
+              <div className="absolute top-14 left-4 right-4 bg-red-50 border border-red-200 text-red-700 rounded-xl p-3 shadow-md z-10 flex flex-col gap-1 max-h-28 overflow-y-auto">
+                <div className="flex items-center gap-1.5 font-bold text-xs text-red-800">
+                  <AlertTriangle className="w-4 h-4 text-red-600" />
+                  <span>Real-Time Syntax Diagnostics:</span>
+                </div>
+                <ul className="list-disc list-inside text-xs pl-1">
+                  {diagnostics.map((err, i) => <li key={i}>{err}</li>)}
+                </ul>
+              </div>
+            )}
             
             <textarea 
               className="flex-1 p-6 font-mono text-sm bg-white focus:outline-none resize-none text-slate-700 leading-relaxed"
@@ -270,6 +326,29 @@ const Dashboard = () => {
                 <button onClick={() => setShowChat(false)} className="hover:bg-blue-700 p-2 rounded-full transition-colors">
                   ✕
                 </button>
+              </div>
+
+              {/* Assistance Level Toggle */}
+              <div className="px-4 py-2 bg-slate-100 border-b border-slate-200 flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500">Assistance Level:</span>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => setAssistanceLevel("basic")}
+                    className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                      assistanceLevel === 'basic' ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'
+                    }`}
+                  >
+                    Basic (Hints Only)
+                  </button>
+                  <button 
+                    onClick={() => setAssistanceLevel("max")}
+                    className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                      assistanceLevel === 'max' ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'
+                    }`}
+                  >
+                    Max (Complete Solutions)
+                  </button>
+                </div>
               </div>
 
               {/* Chat Messages */}

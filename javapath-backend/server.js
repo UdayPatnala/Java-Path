@@ -103,7 +103,7 @@ app.post('/api/execute', authenticateToken, async (req, res) => {
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 app.post('/api/chat', authenticateToken, async (req, res) => {
-  const { message, code, taskDescription } = req.body;
+  const { message, code, taskDescription, assistanceLevel } = req.body;
 
   try {
     const user = await User.findByPk(req.user.id);
@@ -117,6 +117,8 @@ app.post('/api/chat', authenticateToken, async (req, res) => {
       }))
     });
 
+    const isBasic = assistanceLevel === 'basic';
+
     const prompt = `
       Current Task: "${taskDescription || 'General coding'}".
       User's Current Code: 
@@ -124,8 +126,19 @@ app.post('/api/chat', authenticateToken, async (req, res) => {
       ${code || '// No code provided'}
       \`\`\`
       User Message: ${message}
+
+      Assistance Rules (CRITICAL):
+      Assistance Level Selected: ${isBasic ? 'BASIC GUIDANCE' : 'MAX SOLUTION'}.
+      ${isBasic ? 
+        '- DO NOT write the full code solution for the user. Instead, explain the logic, point out compilation/logical errors in their code, and give snippets or pseudocode. Force them to learn by writing the solution themselves.' : 
+        '- Provide the complete, production-grade refactored code solution. Explain the logic and implementation in detail.'
+      }
+
+      Always present two solution recommendations:
+      1. A "Good/Standard" solution (e.g. basic syntax or standard loops).
+      2. A "Better/Best" solution (e.g. using modern Java 17 features like Streams, Lambdas, records, or design patterns).
       
-      Respond as a Senior Java Architect. Keep the tone encouraging but professional. If the user asks for code review, provide corporate-grade refactoring.
+      Respond as a Senior Java Architect. Keep the tone encouraging but highly professional.
     `;
 
     const result = await chat.sendMessage(prompt);
