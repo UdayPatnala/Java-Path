@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './AuthContext';
+import Landing from './Landing';
 import Login from './Login';
 import Dashboard from './Dashboard';
 
@@ -14,8 +15,10 @@ const AppContent = () => {
 
   return (
     <Routes>
-      <Route path="/login" element={token ? <Navigate to="/" /> : <Login />} />
-      <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+      <Route path="/" element={<Landing />} />
+      <Route path="/login" element={token ? <Navigate to="/dashboard" /> : <Login />} />
+      <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+      <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
 };
