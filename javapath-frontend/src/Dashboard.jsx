@@ -1,6 +1,5 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
-import axios from 'react-shadow'; // wait, normal axios
-import axiosOriginal from 'axios';
+import axios from 'axios';
 import { AuthContext } from './AuthContext';
 import { 
   Play, CheckCircle, Code, MessageSquare, 
@@ -9,8 +8,6 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
-
-const axios = axiosOriginal;
 
 // Custom Branded SVG Logo Component
 const Logo = ({ className = "w-8 h-8" }) => (
