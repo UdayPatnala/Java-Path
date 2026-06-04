@@ -28,11 +28,66 @@ const Logo = ({ className = "w-8 h-8" }) => (
 );
 
 const CHALLENGES = [
-  { id: 1, title: "The Main Method", topic: "Syntax", desc: "Your first entry point into the corporate world.", initialCode: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello Corporate World");\n    }\n}` },
-  { id: 2, title: "Variables & Encapsulation", topic: "Basics", desc: "Create a private balance variable and provide a secure Getter and Setter.", initialCode: `public class BankAccount {\n    // Add your private variable and getters/setters here\n    \n    public static void main(String[] args) {\n        BankAccount acc = new BankAccount();\n        System.out.println("Secure System Booted");\n    }\n}` },
-  { id: 3, title: "Conditionals (Auth System)", topic: "Logic", desc: "Write an if-else block to check if user role is 'ADMIN'.", initialCode: `public class Auth {\n    public static void main(String[] args) {\n        String role = "USER";\n        // Write auth logic\n    }\n}` },
-  { id: 4, title: "Loops (Data Processing)", topic: "Loops", desc: "Iterate over an array of transactions and sum them.", initialCode: `public class DataProcessor {\n    public static void main(String[] args) {\n        int[] transactions = {100, 250, 50, 400};\n        // Sum the transactions\n    }\n}` },
-  { id: 5, title: "Polymorphism", topic: "OOP", desc: "Implement interfaces for flexible payment processors.", initialCode: `interface PaymentProcessor {\n    void process();\n}\n\npublic class StripeProcessor implements PaymentProcessor {\n    public void process() { System.out.println("Stripe"); }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        PaymentProcessor p = new StripeProcessor();\n        p.process();\n    }\n}` },
+  { 
+    id: 1, 
+    title: "The Main Method", 
+    topic: "Syntax", 
+    scenario: "You are onboarding at a global financial company. Before committing any enterprise microservices, you need to verify your compilation engine by writing the basic starting script to check JDK compatibility.", 
+    prerequisites: "Class declarations, Java main method signature, and System outputs.", 
+    realWorldUse: "Standard entry points for standalone batch processing, containerized workers, and environment sanity checks.", 
+    input: "Run Command", 
+    output: "Hello Corporate World", 
+    desc: "Create a standard main method class named 'Main' that prints 'Hello Corporate World' to verify environment configuration.", 
+    initialCode: `public class Main {\n    public static void main(String[] args) {\n        // Your corporate journey begins here\n        System.out.println("Hello Corporate World");\n    }\n}` 
+  },
+  { 
+    id: 2, 
+    title: "Variables & Encapsulation", 
+    topic: "Basics", 
+    scenario: "An internal security audit flagged the payment services module. The user bank balance variable is public, meaning external scripts can modify balances directly without security verification.", 
+    prerequisites: "Private variables, encapsulation, Getter/Setter methods, and basic condition checking.", 
+    realWorldUse: "Securing accounting ledgers, shielding user password hashes, and maintaining state validity in database mappings.", 
+    input: "Instantiating BankAccount and updating data", 
+    output: "Secure encapsulation constraints active", 
+    desc: "Refactor the class to protect 'balance' from direct access. Implement a secure setter that only accepts updates greater than 0.", 
+    initialCode: `public class BankAccount {\n    private double balance = 100.0;\n\n    // Implement encapsulation here\n    \n    public static void main(String[] args) {\n        BankAccount acc = new BankAccount();\n        System.out.println("Secure encapsulation constraints active");\n    }\n}` 
+  },
+  { 
+    id: 3, 
+    title: "Conditionals (Auth Gateway)", 
+    topic: "Logic", 
+    scenario: "You are writing a routing filter for the company's admin dashboard. Only users who carry the exact role of 'ADMIN' are permitted to trigger deployment pipelines; others must be blocked.", 
+    prerequisites: "String comparisons, if-else logic, and console feedback.", 
+    realWorldUse: "API gateways, role-based access control (RBAC) middlewares, and routing controllers.", 
+    input: "role = \"USER\"", 
+    output: "Access Denied", 
+    desc: "Write control flow to check if the 'role' variable equals 'ADMIN'. Print 'Access Granted' if true, and 'Access Denied' otherwise.", 
+    initialCode: `public class Auth {\n    public static void main(String[] args) {\n        String role = "USER";\n        // Write logic below\n        \n    }\n}` 
+  },
+  { 
+    id: 4, 
+    title: "Loops (Transaction Ledger)", 
+    topic: "Loops", 
+    scenario: "The daily transaction ledger contains a list of integers representing checkout charges. You need to sum the total values of the ledger to generate the aggregate billing invoice.", 
+    prerequisites: "Arrays, loop iterations (for/while/enhanced), and basic math operators.", 
+    realWorldUse: "Parsing logs, batch invoicing calculations, and aggregating metrics from service logs.", 
+    input: "transactions = {100, 250, 50, 400}", 
+    output: "Invoice Total: 800", 
+    desc: "Write a loop to sum all values in the 'transactions' array and print the output formatted as: 'Invoice Total: <sum>'.", 
+    initialCode: `public class DataProcessor {\n    public static void main(String[] args) {\n        int[] transactions = {100, 250, 50, 400};\n        // Sum loop below\n        \n    }\n}` 
+  },
+  { 
+    id: 5, 
+    title: "Polymorphism (Billing System)", 
+    topic: "OOP", 
+    scenario: "The company accepts multiple payment methods (Stripe, PayPal, Crypto). You are refactoring the billing platform to process any payment method polymorphically using a unified interface, rather than writing duplicate logic for each vendor.", 
+    prerequisites: "Interfaces, implements keyword, class inheritance, and dynamic method binding.", 
+    realWorldUse: "Interchangeable storage adapters, API connectors, and driver management systems.", 
+    input: "Unified method execution", 
+    output: "Processing with Stripe", 
+    desc: "Complete the StripeProcessor implementation and execute the process method polymorphically in the main execution block.", 
+    initialCode: `interface PaymentProcessor {\n    void process();\n}\n\nclass StripeProcessor implements PaymentProcessor {\n    public void process() {\n        System.out.println("Processing with Stripe");\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        PaymentProcessor processor = new StripeProcessor();\n        processor.process();\n    }\n}` 
+  },
 ];
 
 const Dashboard = () => {
@@ -280,27 +335,69 @@ const Dashboard = () => {
 
         {/* --- MAIN WORKSPACE --- */}
         <main className="flex-1 flex flex-col md:flex-row overflow-hidden bg-white">
-          {/* CHALLENGE INFO */}
-          <section className="w-full md:w-[400px] border-r border-slate-200 flex flex-col bg-slate-50/50">
-            <div className="p-6 overflow-y-auto flex-1">
-              <div className="flex items-center gap-1.5 text-blue-600 mb-4 font-bold text-xs">
+          {/* CHALLENGE INFO: RICH TICKET OVERLAY */}
+          <section className="w-full md:w-[420px] border-r border-slate-200 flex flex-col bg-slate-50/50 overflow-y-auto">
+            <div className="p-6 space-y-6">
+              <div className="flex items-center gap-1.5 text-blue-600 font-bold text-xs">
                 <Briefcase className="w-3.5 h-3.5" />
                 <span className="uppercase tracking-wide">Corporate Ticket #JP-20{activeChallengeId}</span>
               </div>
-              <h1 className="text-2xl font-black text-slate-800 tracking-tight mb-4">{activeChallenge?.title}</h1>
               
-              <div className="prose prose-slate text-sm leading-relaxed">
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm my-4">
-                  <h5 className="font-extrabold text-[10px] text-slate-400 uppercase tracking-widest mb-2.5">OBJECTIVE</h5>
-                  <p className="text-slate-700 font-medium italic">"{activeChallenge?.desc}"</p>
+              <div>
+                <h1 className="text-2xl font-black text-slate-855 tracking-tight leading-tight">{activeChallenge?.title}</h1>
+                <span className="text-[10px] font-extrabold px-2.5 py-0.5 bg-slate-200/80 rounded text-slate-500 uppercase tracking-widest mt-2 inline-block">
+                  {activeChallenge?.topic}
+                </span>
+              </div>
+
+              {/* 1. SCENARIO */}
+              <div className="space-y-2">
+                <h5 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Real-World Scenario</h5>
+                <p className="text-xs text-slate-600 bg-white border border-slate-200/60 p-4.5 rounded-2xl shadow-sm leading-relaxed">
+                  {activeChallenge?.scenario}
+                </p>
+              </div>
+
+              {/* 2. OBJECTIVE & EXPECTED INPUTS/OUTPUTS */}
+              <div className="space-y-3 bg-white border border-slate-200/60 p-5 rounded-2xl shadow-sm">
+                <h5 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Specifications</h5>
+                <div className="text-xs font-bold text-slate-700 italic leading-relaxed">
+                  "{activeChallenge?.desc}"
                 </div>
+
+                <div className="border-t border-slate-100 pt-3.5 mt-3 space-y-2">
+                  <div className="flex justify-between items-start gap-4">
+                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Input:</span>
+                    <span className="text-xs text-slate-700 font-mono text-right">{activeChallenge?.input}</span>
+                  </div>
+                  <div className="flex justify-between items-start gap-4">
+                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Expected Output:</span>
+                    <span className="text-xs text-emerald-600 font-mono text-right font-bold">{activeChallenge?.output}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. PREREQUISITES & KNOWLEDGE */}
+              <div className="space-y-2">
+                <h5 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Prerequisites</h5>
+                <p className="text-xs text-slate-600 bg-slate-100/60 p-3.5 rounded-xl border border-slate-200/40">
+                  {activeChallenge?.prerequisites}
+                </p>
+              </div>
+
+              {/* 4. REAL WORLD USE CASE */}
+              <div className="space-y-2">
+                <h5 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Where this occurs in production</h5>
+                <p className="text-xs text-slate-600 bg-slate-100/60 p-3.5 rounded-xl border border-slate-200/40 leading-relaxed">
+                  {activeChallenge?.realWorldUse}
+                </p>
               </div>
 
               {/* GEMINI DRAWER BOX TRIGGER */}
               <motion.div 
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ scale: 1.015 }}
                 onClick={openGeminiReview}
-                className="mt-8 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 p-5 rounded-2xl text-white shadow-lg shadow-blue-200 cursor-pointer"
+                className="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 p-5 rounded-2xl text-white shadow-lg shadow-blue-100 cursor-pointer"
               >
                 <div className="flex items-center gap-2 mb-2">
                   <Sparkles className="w-4.5 h-4.5 text-blue-200 animate-pulse" />
