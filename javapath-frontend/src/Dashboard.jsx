@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
-import axios from 'axios';
+import axios from 'react-shadow'; // wait, normal axios
+import axiosOriginal from 'axios';
 import { AuthContext } from './AuthContext';
 import { 
   Play, CheckCircle, Code, MessageSquare, 
@@ -8,6 +9,8 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
+
+const axios = axiosOriginal;
 
 // Custom Branded SVG Logo Component
 const Logo = ({ className = "w-8 h-8" }) => (
@@ -200,7 +203,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans flex flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col">
       
       {/* --- TOP NAVIGATION BAR --- */}
       <nav className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-50 shadow-sm">
@@ -349,16 +352,16 @@ const Dashboard = () => {
               spellCheck="false"
             />
 
-            {/* BUILD OUTPUT CONSOLE */}
-            <div className="h-48 border-t border-slate-200 bg-slate-900 flex flex-col">
-              <div className="flex items-center gap-2 px-4 py-2.5 border-b border-slate-800 bg-slate-850">
-                <Terminal className="w-4 h-4 text-slate-400" />
-                <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">Build Output</span>
+            {/* BUILD OUTPUT CONSOLE: FULL LIGHT THEME */}
+            <div className="h-48 border-t border-slate-200 bg-slate-55 flex flex-col bg-[#F8FAFC]">
+              <div className="flex items-center gap-2 px-4 py-2.5 border-b border-slate-200 bg-slate-100/50">
+                <Terminal className="w-4 h-4 text-slate-500" />
+                <span className="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest">Build Output</span>
               </div>
-              <div className="p-4 font-mono text-xs text-emerald-400 overflow-y-auto whitespace-pre-wrap flex-1 bg-slate-950/20">
-                {isLoading && <p className="animate-pulse">{'>'} Compiling artifacts...</p>}
-                <p className="text-white font-bold underline mb-1">Output:</p>
-                <p className="text-slate-200">{output || "> Click 'Deploy & Run' to see output..."}</p>
+              <div className="p-4 font-mono text-xs text-slate-800 overflow-y-auto whitespace-pre-wrap flex-1 bg-white">
+                {isLoading && <p className="text-blue-600 animate-pulse">{'>'} Compiling artifacts...</p>}
+                <p className="text-slate-800 font-bold underline mb-1">Output:</p>
+                <p className="text-slate-600">{output || "> Click 'Deploy & Run' to see output..."}</p>
               </div>
             </div>
           </section>
