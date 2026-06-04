@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from './AuthContext';
 import { motion } from 'framer-motion';
-import { Code, Sparkles, Terminal, ShieldCheck, ArrowRight, Play, Briefcase, Award } from 'lucide-react';
+import { Code, Sparkles, Terminal, ShieldCheck, ArrowRight, Play, Briefcase, Award, CheckCircle } from 'lucide-react';
 
 const Logo = ({ className = "w-8 h-8" }) => (
   <svg className={className} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
