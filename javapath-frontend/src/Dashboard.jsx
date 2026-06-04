@@ -167,7 +167,8 @@ const Dashboard = () => {
       });
       setChatHistory(response.data.history);
     } catch (err) {
-      setChatHistory(prev => [...prev, { role: "model", text: "Error connecting to AI mentor." }]);
+      const errMsg = err.response?.data?.error || "Error connecting to AI mentor.";
+      setChatHistory(prev => [...prev, { role: "model", text: errMsg }]);
     }
     setIsChatLoading(false);
   };
