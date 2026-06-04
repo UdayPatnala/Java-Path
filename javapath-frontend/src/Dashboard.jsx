@@ -37,7 +37,7 @@ const Dashboard = () => {
 
   const activeChallenge = CHALLENGES.find(c => c.id === activeChallengeId);
 
-  // Real-time syntax checker logic
+  // Robust real-time syntax checker logic
   useEffect(() => {
     const checkJavaSyntax = (codeText) => {
       const errors = [];
@@ -47,29 +47,51 @@ const Dashboard = () => {
       const openBraces = (codeText.match(/\{/g) || []).length;
       const closeBraces = (codeText.match(/\}/g) || []).length;
       if (openBraces !== closeBraces) {
-        errors.push(`Curly Braces: Open: ${openBraces}, Closed: ${closeBraces}`);
+        errors.push(`Curly Braces: Unmatched. Open braces: ${openBraces}, Closed: ${closeBraces}`);
       }
 
       // 2. Mismatched parens
       const openParens = (codeText.match(/\(/g) || []).length;
       const closeParens = (codeText.match(/\)/g) || []).length;
       if (openParens !== closeParens) {
-        errors.push(`Parentheses: Open: ${openParens}, Closed: ${closeParens}`);
+        errors.push(`Parentheses: Unmatched. Open parens: ${openParens}, Closed: ${closeParens}`);
       }
 
-      // 3. Semicolon detection (basic)
-      const lines = codeText.split('\n');
+      // 3. Semicolon detection (cleaned of comments)
+      // Replace block comments with equal number of newlines to keep line numbers intact
+      let cleanText = codeText.replace(/\/\*[\s\S]*?\*\//g, (match) => '\n'.repeat((match.match(/\n/g) || []).length));
+      
+      const lines = cleanText.split('\n');
       lines.forEach((line, index) => {
-        const trimmed = line.trim();
+        let trimmed = line.trim();
+        
+        // Strip single line comments properly if not in a string literal
+        const commentIndex = trimmed.indexOf('//');
+        if (commentIndex !== -1) {
+          const beforeComment = trimmed.substring(0, commentIndex);
+          const quoteCount = (beforeComment.match(/"/g) || []).length;
+          if (quoteCount % 2 === 0) {
+            trimmed = beforeComment.trim();
+          }
+        }
+
         if (trimmed.length === 0) return;
         
-        // Exclude structure statements
-        if (trimmed.startsWith('//') || trimmed.startsWith('/*') || trimmed.startsWith('*') || trimmed.startsWith('@')) return;
+        // Skip package, import, class structures, method definitions, annotations and control blocks
+        if (trimmed.startsWith('@')) return;
         if (trimmed.endsWith('{') || trimmed.endsWith('}') || trimmed.endsWith(';') || trimmed.endsWith(',')) return;
-        if (trimmed.includes('class ') || trimmed.includes('interface ') || trimmed.includes('public static void main') || trimmed.includes('public void ') || trimmed.includes('private void ') || trimmed.includes('protected void ')) return;
-        if (trimmed.startsWith('if') || trimmed.startsWith('for') || trimmed.startsWith('while') || trimmed.startsWith('switch') || trimmed.startsWith('else')) return;
+        if (trimmed.includes('class ') || trimmed.includes('interface ') || trimmed.includes('enum ')) return;
+        
+        if (trimmed.includes('public ') || trimmed.includes('private ') || trimmed.includes('protected ')) {
+          // If it contains parenthesis and doesn't end with a semicolon or brace, it is likely a method declaration header.
+          if (trimmed.includes('(') && !trimmed.endsWith(';')) return; 
+        }
+        
+        if (trimmed.startsWith('if') || trimmed.startsWith('for') || trimmed.startsWith('while') || 
+            trimmed.startsWith('switch') || trimmed.startsWith('else') || trimmed.startsWith('try') || 
+            trimmed.startsWith('catch') || trimmed.startsWith('finally') || trimmed.startsWith('static')) return;
 
-        errors.push(`Line ${index + 1}: Missing semicolon ';' at end of instruction.`);
+        errors.push(`Line ${index + 1}: Missing semicolon ';' at end of statement.`);
       });
 
       return errors;

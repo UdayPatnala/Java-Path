@@ -28,12 +28,24 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// --- Auth Endpoints ---
+// --- Auth Endpoints with deep validation ---
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { username, password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({ username, password: hashedPassword });
+    
+    // Strict validations
+    if (!username || !password || username.trim() === "" || password.trim() === "") {
+      return res.status(400).json({ error: "Username and password are required." });
+    }
+    if (username.trim().length < 3) {
+      return res.status(400).json({ error: "Username must be at least 3 characters long." });
+    }
+    if (password.trim().length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters long." });
+    }
+
+    const hashedPassword = await bcrypt.hash(password.trim(), 10);
+    const user = await User.create({ username: username.trim(), password: hashedPassword });
     res.json({ message: "User registered successfully" });
   } catch (error) {
     res.status(400).json({ error: "Username might already exist." });
@@ -43,10 +55,15 @@ app.post('/api/auth/register', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { username, password } = req.body;
-    const user = await User.findOne({ where: { username } });
+
+    if (!username || !password || username.trim() === "" || password.trim() === "") {
+      return res.status(400).json({ error: "Username and password are required." });
+    }
+
+    const user = await User.findOne({ where: { username: username.trim() } });
     if (!user) return res.status(400).json({ error: "User not found" });
 
-    const validPassword = await bcrypt.compare(password, user.password);
+    const validPassword = await bcrypt.compare(password.trim(), user.password);
     if (!validPassword) return res.status(400).json({ error: "Invalid password" });
 
     const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET);
@@ -68,7 +85,10 @@ app.get('/api/progress', authenticateToken, async (req, res) => {
 
 app.post('/api/progress', authenticateToken, async (req, res) => {
   try {
-    const { completedDays } = req.body; // Array of completed day IDs
+    const { completedDays } = req.body;
+    if (!Array.isArray(completedDays)) {
+      return res.status(400).json({ error: "Completed days must be an array." });
+    }
     const user = await User.findByPk(req.user.id);
     user.progress = completedDays;
     await user.save();
@@ -81,6 +101,10 @@ app.post('/api/progress', authenticateToken, async (req, res) => {
 // --- JDoodle Endpoint (Execute Java Code) ---
 app.post('/api/execute', authenticateToken, async (req, res) => {
   const { code } = req.body;
+
+  if (!code || code.trim() === "") {
+    return res.status(400).json({ error: "Cannot execute empty code." });
+  }
   
   const program = {
     script: code,
@@ -100,10 +124,19 @@ app.post('/api/execute', authenticateToken, async (req, res) => {
 });
 
 // --- Gemini Endpoint (AI Code Review w/ Chat History) ---
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "dummy_key");
 
 app.post('/api/chat', authenticateToken, async (req, res) => {
   const { message, code, taskDescription, assistanceLevel } = req.body;
+
+  if (!message || message.trim() === "") {
+    return res.status(400).json({ error: "Message cannot be empty." });
+  }
+
+  // Handle case where API Key is not configured to fail gracefully
+  if (!process.env.GEMINI_API_KEY) {
+    return res.status(500).json({ error: "AI Mentor is currently offline (API Key missing)." });
+  }
 
   try {
     const user = await User.findByPk(req.user.id);
@@ -156,7 +189,7 @@ app.post('/api/chat', authenticateToken, async (req, res) => {
     res.json({ response: responseText, history: newHistory });
   } catch (error) {
     console.error("AI Chat failed:", error.message);
-    res.status(500).json({ error: "AI Chat failed" });
+    res.status(500).json({ error: "AI Chat failed to process instructions." });
   }
 });
 
