@@ -1,7 +1,24 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from './AuthContext';
 import { motion } from 'framer-motion';
-import { Code, KeyRound, User as UserIcon } from 'lucide-react';
+import { KeyRound, User as UserIcon, Sparkles } from 'lucide-react';
+
+const Logo = ({ className = "w-12 h-12" }) => (
+  <svg className={className} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#3B82F6" />
+        <stop offset="50%" stopColor="#8B5CF6" />
+        <stop offset="100%" stopColor="#EC4899" />
+      </linearGradient>
+    </defs>
+    <path d="M30 35 Q45 15 50 35 T70 35" stroke="url(#logoGrad)" strokeWidth="6" strokeLinecap="round" fill="none" />
+    <path d="M40 25 Q55 10 60 25 T80 25" stroke="url(#logoGrad)" strokeWidth="4" strokeLinecap="round" fill="none" />
+    <path d="M25 45 C25 68, 75 68, 75 45 C75 35, 25 35, 25 45 Z" fill="url(#logoGrad)" />
+    <path d="M72 48 C85 48, 85 58, 72 58" stroke="url(#logoGrad)" strokeWidth="5" strokeLinecap="round" fill="none" />
+    <path d="M20 75 L80 75" stroke="url(#logoGrad)" strokeWidth="6" strokeLinecap="round" />
+  </svg>
+);
 
 const Login = () => {
   const { login, register } = useContext(AuthContext);
@@ -9,10 +26,12 @@ const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
     try {
       if (isLogin) {
         await login(username, password);
@@ -21,61 +40,80 @@ const Login = () => {
       }
     } catch (err) {
       setError(err.response?.data?.error || 'Authentication failed');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden"
-      >
-        <div className="bg-blue-600 p-8 text-center text-white">
-          <div className="bg-white/20 p-3 rounded-2xl inline-block mb-4">
-            <Code className="w-8 h-8" />
-          </div>
-          <h1 className="text-2xl font-black tracking-tight">JavaPath Pro</h1>
-          <p className="text-blue-200 text-sm mt-2">Your corporate journey awaits</p>
-        </div>
+    <div className="min-h-screen bg-[#0F172A] flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Decorative Animated Gradients */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full filter blur-[80px] animate-pulse" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full filter blur-[80px] animate-pulse" style={{ animationDelay: '2s' }} />
 
-        <div className="p-8">
-          <h2 className="text-xl font-bold text-slate-800 mb-6 text-center">
-            {isLogin ? 'Sign in to your account' : 'Create a new account'}
-          </h2>
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="w-full max-w-md relative z-10"
+      >
+        <div className="backdrop-blur-xl bg-slate-900/60 border border-slate-800 rounded-3xl p-8 shadow-2xl shadow-black/50">
+          
+          {/* Header */}
+          <div className="text-center mb-8">
+            <motion.div 
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className="inline-block mb-3"
+            >
+              <Logo className="w-16 h-16 mx-auto" />
+            </motion.div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-white bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              JavaPath Pro
+            </h1>
+            <p className="text-slate-400 text-sm mt-2">
+              Accelerate your engineering journey with AI mentorship
+            </p>
+          </div>
 
           {error && (
-            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4 font-medium">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="bg-red-500/10 border border-red-500/20 text-red-400 p-3.5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-ping" />
               {error}
-            </div>
+            </motion.div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Username</label>
+              <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Username</label>
               <div className="relative">
-                <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-500" />
                 <input 
                   type="text" 
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                  placeholder="e.g. Alex_Dev"
+                  className="w-full bg-slate-950/40 border border-slate-800 text-white pl-11 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all text-sm"
+                  placeholder="alex_dev"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Password</label>
+              <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Password</label>
               <div className="relative">
-                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-500" />
                 <input 
                   type="password" 
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  className="w-full bg-slate-950/40 border border-slate-800 text-white pl-11 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all text-sm"
                   placeholder="••••••••"
                 />
               </div>
@@ -83,20 +121,38 @@ const Login = () => {
 
             <button 
               type="submit" 
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition-all shadow-md mt-4"
+              disabled={loading}
+              className="w-full relative group overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg hover:shadow-purple-500/20 active:scale-95 flex items-center justify-center gap-2"
             >
-              {isLogin ? 'Sign In' : 'Create Account'}
+              <span className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 text-purple-200" />
+                  <span>{isLogin ? 'Sign In to Dashboard' : 'Launch New Account'}</span>
+                </>
+              )}
             </button>
           </form>
 
-          <div className="mt-6 text-center">
+          {/* Selector */}
+          <div className="mt-8 text-center border-t border-slate-800 pt-6">
             <button 
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-slate-500 hover:text-blue-600 font-medium transition-colors"
+              onClick={() => {
+                setIsLogin(!isLogin);
+                setError('');
+              }}
+              className="text-xs text-slate-400 hover:text-white font-semibold transition-colors"
             >
-              {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+              {isLogin ? (
+                <>New to JavaPath? <span className="text-blue-400 hover:underline">Start your career path here</span></>
+              ) : (
+                <>Already on the path? <span className="text-blue-400 hover:underline">Sign in</span></>
+              )}
             </button>
           </div>
+
         </div>
       </motion.div>
     </div>
