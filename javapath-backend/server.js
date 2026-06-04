@@ -1,15 +1,85 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 require('dotenv').config();
+
+const { User } = require('./db');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 1. JDoodle Endpoint (Execute Java Code)
-app.post('/api/execute', async (req, res) => {
+const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_corporate_key_2026';
+
+// --- Authentication Middleware ---
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) return res.status(401).json({ error: "Access Denied" });
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ error: "Invalid Token" });
+    req.user = user;
+    next();
+  });
+};
+
+// --- Auth Endpoints ---
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await User.create({ username, password: hashedPassword });
+    res.json({ message: "User registered successfully" });
+  } catch (error) {
+    res.status(400).json({ error: "Username might already exist." });
+  }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const user = await User.findOne({ where: { username } });
+    if (!user) return res.status(400).json({ error: "User not found" });
+
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) return res.status(400).json({ error: "Invalid password" });
+
+    const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET);
+    res.json({ token, username: user.username, progress: user.progress || [], chatHistory: user.chatHistory || [] });
+  } catch (error) {
+    res.status(500).json({ error: "Login failed" });
+  }
+});
+
+// --- Progress Endpoints ---
+app.get('/api/progress', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findByPk(req.user.id);
+    res.json({ progress: user.progress || [] });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch progress" });
+  }
+});
+
+app.post('/api/progress', authenticateToken, async (req, res) => {
+  try {
+    const { completedDays } = req.body; // Array of completed day IDs
+    const user = await User.findByPk(req.user.id);
+    user.progress = completedDays;
+    await user.save();
+    res.json({ success: true, progress: user.progress });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update progress" });
+  }
+});
+
+// --- JDoodle Endpoint (Execute Java Code) ---
+app.post('/api/execute', authenticateToken, async (req, res) => {
   const { code } = req.body;
   
   const program = {
@@ -29,32 +99,63 @@ app.post('/api/execute', async (req, res) => {
   }
 });
 
-// 2. Gemini Endpoint (AI Code Review)
+// --- Gemini Endpoint (AI Code Review w/ Chat History) ---
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-app.post('/api/review', async (req, res) => {
-  const { code, taskDescription } = req.body;
+app.post('/api/chat', authenticateToken, async (req, res) => {
+  const { message, code, taskDescription } = req.body;
 
   try {
+    const user = await User.findByPk(req.user.id);
+    const history = user.chatHistory || [];
+
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const chat = model.startChat({
+      history: history.map(msg => ({
+        role: msg.role === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.text }]
+      }))
+    });
+
     const prompt = `
-      You are a Senior Java Architect at a top tech company. 
-      Review this student's code based on this task: "${taskDescription}".
-      Code: "${code}"
-      Provide:
-      1. A professional critique (Encapsulation, Naming, Efficiency).
-      2. A "Corporate Grade" version of the code.
-      3. A brief explanation of why the change is better for production.
-      Keep the tone encouraging but professional.
+      Current Task: "${taskDescription || 'General coding'}".
+      User's Current Code: 
+      \`\`\`java
+      ${code || '// No code provided'}
+      \`\`\`
+      User Message: ${message}
+      
+      Respond as a Senior Java Architect. Keep the tone encouraging but professional. If the user asks for code review, provide corporate-grade refactoring.
     `;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    res.json({ feedback: response.text() });
+    const result = await chat.sendMessage(prompt);
+    const responseText = await result.response.text();
+
+    // Update history
+    const newHistory = [
+      ...history,
+      { role: "user", text: message },
+      { role: "model", text: responseText }
+    ];
+    user.chatHistory = newHistory;
+    await user.save();
+
+    res.json({ response: responseText, history: newHistory });
   } catch (error) {
-    console.error("AI Review failed:", error.message);
-    res.status(500).json({ error: "AI Review failed" });
+    console.error("AI Chat failed:", error.message);
+    res.status(500).json({ error: "AI Chat failed" });
   }
+});
+
+app.post('/api/chat/clear', authenticateToken, async (req, res) => {
+    try {
+        const user = await User.findByPk(req.user.id);
+        user.chatHistory = [];
+        await user.save();
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: "Failed to clear chat history" });
+    }
 });
 
 const PORT = process.env.PORT || 5000;
