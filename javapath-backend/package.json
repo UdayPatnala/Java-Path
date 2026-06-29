@@ -12,7 +12,7 @@
     "node": "20.x"
   },
   "keywords": [],
-  "author": "",
+  "author": "Patnala Uday Kumar",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
