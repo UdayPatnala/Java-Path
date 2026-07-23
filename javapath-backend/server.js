@@ -12,7 +12,23 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_corporate_key_2026';
+// --- Environment Validation & Warnings ---
+const checkEnvConfig = () => {
+  const requiredVars = ['GEMINI_API_KEY', 'JDOODLE_CLIENT_ID', 'JDOODLE_CLIENT_SECRET'];
+  requiredVars.forEach((key) => {
+    if (!process.env[key] || process.env[key].startsWith('YOUR_')) {
+      console.warn(`[WARN] Environment variable ${key} is missing or using placeholder value.`);
+    }
+  });
+  if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'YOUR_JWT_SECRET') {
+    console.warn('[WARN] JWT_SECRET is using default fallback key. Please configure a secure JWT_SECRET.');
+  }
+};
+checkEnvConfig();
+
+const JWT_SECRET = (process.env.JWT_SECRET && process.env.JWT_SECRET !== 'YOUR_JWT_SECRET')
+  ? process.env.JWT_SECRET
+  : 'super_secret_corporate_key_2026';
 
 // --- Authentication Middleware ---
 const authenticateToken = (req, res, next) => {
@@ -105,6 +121,11 @@ app.post('/api/execute', authenticateToken, async (req, res) => {
   if (!code || code.trim() === "") {
     return res.status(400).json({ error: "Cannot execute empty code." });
   }
+
+  if (!process.env.JDOODLE_CLIENT_ID || process.env.JDOODLE_CLIENT_ID.startsWith("YOUR_") ||
+      !process.env.JDOODLE_CLIENT_SECRET || process.env.JDOODLE_CLIENT_SECRET.startsWith("YOUR_")) {
+    return res.status(500).json({ error: "Code Execution service is currently offline (JDoodle API Keys missing or invalid)." });
+  }
   
   const program = {
     script: code,
@@ -124,7 +145,11 @@ app.post('/api/execute', authenticateToken, async (req, res) => {
 });
 
 // --- Gemini Endpoint (AI Code Review w/ Chat History) ---
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "dummy_key");
+const genAI = new GoogleGenerativeAI(
+  (process.env.GEMINI_API_KEY && !process.env.GEMINI_API_KEY.startsWith("YOUR_")) 
+    ? process.env.GEMINI_API_KEY 
+    : "dummy_key"
+);
 
 app.post('/api/chat', authenticateToken, async (req, res) => {
   const { message, code, taskDescription, assistanceLevel } = req.body;
@@ -134,8 +159,8 @@ app.post('/api/chat', authenticateToken, async (req, res) => {
   }
 
   // Handle case where API Key is not configured to fail gracefully
-  if (!process.env.GEMINI_API_KEY) {
-    return res.status(500).json({ error: "AI Mentor is currently offline (API Key missing)." });
+  if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.startsWith("YOUR_")) {
+    return res.status(500).json({ error: "AI Mentor is currently offline (API Key missing or invalid)." });
   }
 
   try {

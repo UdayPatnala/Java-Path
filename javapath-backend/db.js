@@ -1,9 +1,13 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const path = require('path');
 
+const dbStorage = process.env.DB_STORAGE
+  ? path.resolve(process.env.DB_STORAGE)
+  : path.join(__dirname, 'javapath.sqlite');
+
 const sequelize = new Sequelize({
   dialect: 'sqlite',
-  storage: path.join(__dirname, 'javapath.sqlite'),
+  storage: dbStorage,
   logging: false
 });
 
