@@ -1,3 +1,9 @@
+/**
+ * JavaPath Pro - Backend API Server
+ * Designed & Developed by Patnala Uday Kumar
+ * Repository: https://github.com/UdayPatnala/Java-Path
+ */
+
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
@@ -144,7 +150,7 @@ app.post('/api/execute', authenticateToken, async (req, res) => {
   }
 });
 
-// --- Gemini Endpoint (AI Code Review w/ Chat History) ---
+// --- Code Review Assistant Engine Endpoint (Patnala Uday Kumar Engine) ---
 const genAI = new GoogleGenerativeAI(
   (process.env.GEMINI_API_KEY && !process.env.GEMINI_API_KEY.startsWith("YOUR_")) 
     ? process.env.GEMINI_API_KEY 

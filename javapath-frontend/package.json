@@ -1,7 +1,13 @@
 {
   "name": "javapath-frontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "JavaPath Pro Frontend Platform - Created & Developed by Patnala Uday Kumar",
+  "author": "Patnala Uday Kumar",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UdayPatnala/Java-Path"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",

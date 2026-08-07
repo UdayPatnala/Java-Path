@@ -1,8 +1,12 @@
 {
   "name": "javapath-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "JavaPath Pro Backend REST API Service - Created & Developed by Patnala Uday Kumar",
   "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UdayPatnala/Java-Path"
+  },
   "scripts": {
     "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1",

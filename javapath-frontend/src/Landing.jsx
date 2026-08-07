@@ -146,7 +146,7 @@ const Landing = () => {
               <div className="bg-purple-100 text-purple-600 p-2.5 rounded-xl w-fit">
                 <Sparkles className="w-5 h-5" />
               </div>
-              <h3 className="font-bold text-lg text-slate-800">Gemini Staff Architect</h3>
+              <h3 className="font-bold text-lg text-slate-800">Enterprise Staff Architect</h3>
               <p className="text-slate-500 text-sm leading-relaxed font-medium">
                 Adjust the assistance level to toggle between conceptual clues (Hints Only) and code refactors showing standard vs. best performance choices.
               </p>
@@ -219,7 +219,7 @@ const Landing = () => {
       </section>
 
       <footer className="py-8 bg-slate-950 border-t border-white/5 px-6 text-center text-slate-600 text-xs">
-        <p>&copy; 2026 JavaPath Pro. Crafted with Google AI Studio Gemini API integration. All rights reserved.</p>
+        <p>&copy; 2026 JavaPath Pro. Designed and Developed by Patnala Uday Kumar. All rights reserved.</p>
       </footer>
     </div>
   );

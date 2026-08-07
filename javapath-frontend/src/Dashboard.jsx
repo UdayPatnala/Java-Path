@@ -237,7 +237,7 @@ const Dashboard = () => {
   };
 
   const handleClearChatHistory = async () => {
-    if (window.confirm("Clear all conversation history with Gemini?")) {
+    if (window.confirm("Clear all conversation history with Staff Mentor?")) {
       try {
         await axios.post(`${API_BASE_URL}/api/chat/clear`);
         setChatHistory([]);
@@ -401,7 +401,7 @@ const Dashboard = () => {
               >
                 <div className="flex items-center gap-2 mb-2">
                   <Sparkles className="w-4.5 h-4.5 text-blue-200 animate-pulse" />
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest">Gemini AI Mentor</span>
+                  <span className="text-[10px] font-extrabold uppercase tracking-widest">Staff Code Mentor</span>
                 </div>
                 <p className="text-xs opacity-90 leading-relaxed">"Need help or want to inspect alternative design patterns? Click here to chat with your Senior Mentor."</p>
               </motion.div>
@@ -481,7 +481,7 @@ const Dashboard = () => {
                 <div className="flex items-center gap-3">
                   <Sparkles className="w-6 h-6 text-blue-200" />
                   <div>
-                    <h2 className="text-base font-extrabold tracking-tight">Gemini Mentor</h2>
+                    <h2 className="text-base font-extrabold tracking-tight">Staff Code Mentor</h2>
                     <p className="text-[10px] opacity-80">Senior Staff Engineer</p>
                   </div>
                 </div>
@@ -553,7 +553,7 @@ const Dashboard = () => {
                     type="text" 
                     value={chatMessage}
                     onChange={(e) => setChatMessage(e.target.value)}
-                    placeholder="Ask Gemini about your code..."
+                    placeholder="Ask Staff Mentor about your code..."
                     className="flex-1 border border-slate-200 rounded-full px-4.5 py-2 text-xs focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-slate-50 focus:bg-white"
                   />
                   <button 
@@ -641,6 +641,7 @@ const Dashboard = () => {
                       <LogOut className="w-4 h-4 text-slate-400" />
                       <span>Sign Out Account</span>
                     </button>
+                    <p className="text-[9px] text-slate-400 font-medium mt-3 text-center">JavaPath Pro &copy; 2026 Designed & Developed by Patnala Uday Kumar</p>
                   </div>
                 </div>
               </motion.div>
@@ -651,9 +652,11 @@ const Dashboard = () => {
 
       {/* --- FOOTER STATUS --- */}
       <footer className="h-8 bg-white border-t border-slate-200 px-6 flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-        <div className="flex gap-4">
+        <div className="flex gap-4 items-center">
           <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"/> Server: Connected</span>
           <span>Latency: 12ms</span>
+          <span className="text-slate-300">|</span>
+          <span className="text-slate-600 font-semibold tracking-normal">Created by Patnala Uday Kumar</span>
         </div>
         <div className="flex gap-4">
           <span>Java Version: 17 (LTS)</span>

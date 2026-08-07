@@ -1,3 +1,9 @@
+/**
+ * JavaPath Pro - Database & Persistence Layer
+ * Designed & Developed by Patnala Uday Kumar
+ * Repository: https://github.com/UdayPatnala/Java-Path
+ */
+
 const { Sequelize, DataTypes } = require('sequelize');
 const path = require('path');
 
